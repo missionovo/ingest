@@ -88,10 +88,10 @@ if __name__ == "__main__":
 
     if os.path.exists(conf_path):
         config.read(conf_path)
-        if parsed.type in config and "bucket" in parsed["default"] and "customer" in parsed["default"]:
+        if parsed.type in config and "bucket" in config["default"] and "customer" in config["default"]:
             main(
-                bucket=parsed["default"]["bucket"],
-                customer=parsed["default"]["customer"],
+                bucket=config["default"]["bucket"],
+                customer=config["default"]["customer"],
                 log_path=config[parsed.type]["path"].strip(),
                 type=parsed.type
             )

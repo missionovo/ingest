@@ -1,3 +1,12 @@
+#!/usr/bin/python3
+'''
+Created By: Brett
+Updated By: Brett
+Created On: 2024-04-19
+Updated On: 2024-04-19
+Purpose: troller_upload_s3.py is a utility script to tail log files and route them to s3 for ingest into the Troller platform
+'''
+
 from argparse import ArgumentParser
 import boto3
 from configparser import ConfigParser

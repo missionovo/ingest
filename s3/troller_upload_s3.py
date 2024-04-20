@@ -12,6 +12,7 @@ import boto3
 from configparser import ConfigParser
 from datetime import datetime
 import os
+from pathlib import Path
 import socket
 import sys
 import time
@@ -48,7 +49,7 @@ def send_to_s3(
 def main(
         log_path: str
     ):
-  assert os.path.isfile(log_path), ('"%s" is not a file or is missing' % log_path)
+  assert Path(log_path).is_file(), ('"%s" is not a file or is missing' % log_path)
 
   file_id = unique_file_identifier(log_path)
 
@@ -80,7 +81,7 @@ def main(
 
 def unique_file_identifier(filename):
   # NOTE: `st_ino` is always 0 on windows, which won't work
-  return os.stat(filename).st_ino
+  return Path(filename).stat().st_ino
 
 if __name__ == "__main__":
     parsed = args.parse_args()

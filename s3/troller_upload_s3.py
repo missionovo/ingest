@@ -60,7 +60,7 @@ def main(
         log_entries = []
         log_bytes = 0
         while True:
-            if p.poll(2):
+            if p.poll(10):
                 line_counter = 0
                 for line in f.stdout.readlines():
                     line_counter += 1
@@ -72,7 +72,7 @@ def main(
                 log_bytes = 0
                 log_entries = []
             else:
-                time.sleep(2)
+                time.sleep(1)
     except Exception as e:
         print(f"An error occurred trying to iterate through the log entries: {e}")
     finally:

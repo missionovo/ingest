@@ -26,20 +26,10 @@ args = ArgumentParser(
 args.add_argument('-c', '--config', type=str, required=True, help='path to the config file for the application')
 args.add_argument('-t', '--type', type=str, required=True, help='what log type are we collecting - should tie to a stanza in troller-s3.conf')
 
-MAX_LOG_BYTES = 10485760
+MAX_LOG_BYTES = 1048576
 
 config = ConfigParser()
 s3 = boto3.resource("s3")
-
-def load_path(
-        conf_path: str = "./config/troller-s3.conf",
-        header: str = "auditd"
-    ) -> str:
-    conf = config.read(conf_path)
-    if header in conf:
-        return conf[header]["path"]
-    else:
-        print(f"unable to find header {header} in config file: {conf_path}")
 
 def send_to_s3(
         bucket: str,
@@ -70,10 +60,13 @@ def main(
         log_entries = []
         log_bytes = 0
         while True:
-            if p.poll(1):
+            if p.poll(2):
+                line_counter = 0
                 for line in f.stdout.readlines():
+                    line_counter += 1
                     log_bytes += len(line)
                     log_entries.append(line)
+                print(f"adding {line_counter} lines to log entries list")
             if log_bytes >= MAX_LOG_BYTES:
                 send_to_s3(bucket=bucket,customer=customer,entries=log_entries,type=type)
                 log_bytes = 0

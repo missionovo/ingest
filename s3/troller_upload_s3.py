@@ -78,6 +78,7 @@ def main(
         time.sleep(0.5)
   finally:
     f.close()
+    sys.exit(0)
 
 def unique_file_identifier(filename):
   # NOTE: `st_ino` is always 0 on windows, which won't work

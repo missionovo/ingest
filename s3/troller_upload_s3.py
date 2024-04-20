@@ -76,11 +76,11 @@ def main(
                 log_bytes = 0
                 log_entries = []
             else:
-                time.sleep(10)
+                time.sleep(2)
     except Exception as e:
         print(f"An error occurred trying to iterate through the log entries: {e}")
     finally:
-            p.unregister()
+            p.unregister(f.stdout)
 
 if __name__ == "__main__":
     parsed = args.parse_args()

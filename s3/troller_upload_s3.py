@@ -97,9 +97,7 @@ if __name__ == "__main__":
 
             for lines in main(log_path=config[parsed.type]["path"].strip()):
                 log_entries.extend(lines)
-
-                print(f"there are now: {len(log_entries)} entries in the log_entries list")
-
+                #print(f"there are now: {len(log_entries)} entries in the log_entries list")
                 if len(log_entries) >= MAX_LOG_LINES:
                     send_to_s3(bucket=bucket,customer=customer,entries=log_entries,type=type)
                     log_entries = []

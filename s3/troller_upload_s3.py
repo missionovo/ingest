@@ -14,6 +14,7 @@ from datetime import datetime
 import os
 import subprocess
 import select
+import sys
 import time
 from typing import List
 
@@ -80,7 +81,9 @@ def main(
     except Exception as e:
         print(f"An error occurred trying to iterate through the log entries: {e}")
     finally:
+            print("unregistering file tail before exit")
             p.unregister(f.stdout)
+            sys.exit(0)
 
 if __name__ == "__main__":
     parsed = args.parse_args()

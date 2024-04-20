@@ -50,8 +50,10 @@ def send_to_s3(
     datestr = datetime.utcnow().strftime("%Y%m%d%H%M%S")
     file_key = f"{customer}/{type}{datestr}.txt"
 
+    print(f"loading object with key: {file_key} at bucket: {bucket}; body length: {len(entries)}")
+
     s3_object = s3.Object(Bucket=bucket, Key=file_key)
-    s3_object.put('\n'.join(entries))
+    s3_object.put(Body='\n'.join(entries))
 
 def main(
         bucket: str,

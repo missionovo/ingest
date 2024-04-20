@@ -12,8 +12,7 @@ import boto3
 from configparser import ConfigParser
 from datetime import datetime
 import os
-import subprocess
-import select
+import socket
 import sys
 import time
 from typing import List
@@ -37,8 +36,9 @@ def send_to_s3(
         entries: List[str],
         type: str
     ) -> None:
+    hostname = socket.gethostname()
     datestr = datetime.utcnow().strftime("%Y%m%d%H%M%S")
-    file_key = f"{customer}/{type}{datestr}.txt"
+    file_key = f"{customer}/{hostname}/{type}{datestr}.log"
 
     print(f"loading object with key: {file_key} at bucket: {bucket}; body length: {len(entries)}")
 
@@ -46,39 +46,41 @@ def send_to_s3(
     s3_object.put(Body='\n'.join(entries))
 
 def main(
-        bucket: str,
-        customer: str,
-        log_path: str,
-        type: str
-    ) -> None:
+        log_path: str
+    ):
+  assert os.path.isfile(log_path), ('"%s" is not a file or is missing' % log_path)
 
-    try:
-        f = subprocess.Popen(['tail', '-F', log_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        p = select.poll()
-        p.register(f.stdout)
+  file_id = unique_file_identifier(log_path)
 
-        log_entries = []
-        log_bytes = 0
-        while True:
-            if p.poll(10):
-                line_counter = 0
-                for line in f.stdout.readlines():
-                    line_counter += 1
-                    log_bytes += len(line)
-                    log_entries.append(line)
-                print(f"adding {line_counter} lines to log entries list")
-            if log_bytes >= MAX_LOG_BYTES:
-                send_to_s3(bucket=bucket,customer=customer,entries=log_entries,type=type)
-                log_bytes = 0
-                log_entries = []
-            else:
-                time.sleep(1)
-    except Exception as e:
-        print(f"An error occurred trying to iterate through the log entries: {e}")
-    finally:
-            print("unregistering file tail before exit")
-            p.unregister(f.stdout)
-            sys.exit(0)
+  line_group = []
+  f = open(log_path, 'r')
+  try:
+    while True:
+      line = f.readline()
+      if line:
+        line_group.append(line)
+      else:
+        # Only send the lines once we are all caught up (line = None)
+        if len(line_group) > 0:
+          yield line_group
+          line_group = []
+
+        # Check if the log has rotated. If so, get the new log file
+        # TODO: any potential errors to handle here? missing file? etc?
+        latest_file_id = unique_file_identifier(log_path)
+        if latest_file_id != file_id:
+          file_id = latest_file_id
+          f.close()
+          f = open(log_path, 'r')
+
+        # Wait for more lines to accumulate
+        time.sleep(0.5)
+  finally:
+    f.close()
+
+def unique_file_identifier(filename):
+  # NOTE: `st_ino` is always 0 on windows, which won't work
+  return os.stat(filename).st_ino
 
 if __name__ == "__main__":
     parsed = args.parse_args()
@@ -87,12 +89,20 @@ if __name__ == "__main__":
     if os.path.exists(conf_path):
         config.read(conf_path)
         if parsed.type in config and "bucket" in config["default"] and "customer" in config["default"]:
-            main(
-                bucket=config["default"]["bucket"],
-                customer=config["default"]["customer"],
-                log_path=config[parsed.type]["path"].strip(),
-                type=parsed.type
-            )
+            bucket=config["default"]["bucket"]
+            customer=config["default"]["customer"]
+            log_entries = []
+            log_bytes = 0
+            type=parsed.type
+
+            for line in main(log_path=config[parsed.type]["path"].strip()):
+                log_bytes += len(line)
+                log_entries.append(line)
+
+                if log_bytes >= MAX_LOG_BYTES:
+                    send_to_s3(bucket=bucket,customer=customer,entries=log_entries,type=type)
+                    log_bytes = 0
+                    log_entries = []
         else:
             print(f'''required parameters missing from configuration file. make sure default has
                   populated keys for bucket and customer and the type {parsed.type} you are adding

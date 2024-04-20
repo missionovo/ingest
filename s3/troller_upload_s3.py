@@ -96,14 +96,12 @@ if __name__ == "__main__":
             type=parsed.type
 
             for lines in main(log_path=config[parsed.type]["path"].strip()):
-                log_bytes += len(lines)
                 log_entries.extend(lines)
 
                 print(f"there are now: {len(log_entries)} entries in the log_entries list")
 
                 if len(log_entries) >= MAX_LOG_LINES:
                     send_to_s3(bucket=bucket,customer=customer,entries=log_entries,type=type)
-                    log_bytes = 0
                     log_entries = []
         else:
             print(f'''required parameters missing from configuration file. make sure default has

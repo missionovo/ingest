@@ -43,7 +43,7 @@ def send_to_s3(
 
     print(f"loading object with key: {file_key} at bucket: {bucket}; body length: {len(entries)}")
 
-    s3_object = s3.Object(Bucket=bucket, Key=file_key)
+    s3_object = s3.Object(bucket, file_key)
     s3_object.put(Body='\n'.join(entries))
 
 def main(

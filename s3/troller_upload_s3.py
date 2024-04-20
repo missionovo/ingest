@@ -26,7 +26,7 @@ args = ArgumentParser(
 args.add_argument('-c', '--config', type=str, required=True, help='path to the config file for the application')
 args.add_argument('-t', '--type', type=str, required=True, help='what log type are we collecting - should tie to a stanza in troller-s3.conf')
 
-MAX_LOG_BYTES = 1048576
+MAX_LOG_LINES = 10_000
 
 config = ConfigParser()
 s3 = boto3.resource("s3")
@@ -93,14 +93,15 @@ if __name__ == "__main__":
             bucket=config["default"]["bucket"]
             customer=config["default"]["customer"]
             log_entries = []
-            log_bytes = 0
             type=parsed.type
 
-            for line in main(log_path=config[parsed.type]["path"].strip()):
-                log_bytes += len(line)
-                log_entries.append(line)
+            for lines in main(log_path=config[parsed.type]["path"].strip()):
+                log_bytes += len(lines)
+                log_entries.extend(lines)
 
-                if log_bytes >= MAX_LOG_BYTES:
+                print(f"there are now: {len(log_entries)} entries in the log_entries list")
+
+                if len(log_entries) >= MAX_LOG_LINES:
                     send_to_s3(bucket=bucket,customer=customer,entries=log_entries,type=type)
                     log_bytes = 0
                     log_entries = []

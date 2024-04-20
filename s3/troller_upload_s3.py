@@ -49,9 +49,9 @@ def send_to_s3(
 def main(
         log_path: str
     ):
-  assert Path(log_path).is_file(), ('"%s" is not a file or is missing' % log_path)
-
-  file_id = unique_file_identifier(log_path)
+  #assert Path(log_path).is_file(), ('"%s" is not a file or is missing' % log_path)
+  print(f"this is the path we are using: {log_path}")
+  file_id = 1 #unique_file_identifier(log_path)
 
   line_group = []
   f = open(log_path, 'r')

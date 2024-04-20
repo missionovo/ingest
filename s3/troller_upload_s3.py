@@ -46,7 +46,7 @@ def send_to_s3(
     file_key = f"{customer}/{hostname}/{type}{datestr}.zst"
 
     print(f"loading object with key: {file_key} at bucket: {bucket}; body length: {len(entries)}")
-    payload_bytestr = '\n'.join(entries).encode('utf-8')
+    payload_bytestr = ''.join(entries).encode('utf-8')
     compressed_payload = compress_payload(payload=payload_bytestr)
 
     s3_object = s3.Object(bucket, file_key)

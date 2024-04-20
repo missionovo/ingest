@@ -17,6 +17,7 @@ import socket
 import sys
 import time
 from typing import List
+import zstd
 
 args = ArgumentParser(
     prog='Troller S3 Transfer',
@@ -26,10 +27,13 @@ args = ArgumentParser(
 args.add_argument('-c', '--config', type=str, required=True, help='path to the config file for the application')
 args.add_argument('-t', '--type', type=str, required=True, help='what log type are we collecting - should tie to a stanza in troller-s3.conf')
 
-MAX_LOG_LINES = 10_000
+MAX_LOG_LINES = 50_000
 
 config = ConfigParser()
 s3 = boto3.resource("s3")
+
+def compress_payload(payload: bytes, compression_ratio: int = 10):
+   return zstd.compress(payload, compression_ratio)
 
 def send_to_s3(
         bucket: str,
@@ -39,18 +43,20 @@ def send_to_s3(
     ) -> None:
     hostname = socket.gethostname()
     datestr = datetime.utcnow().strftime("%Y%m%d%H%M%S")
-    file_key = f"{customer}/{hostname}/{type}{datestr}.log"
+    file_key = f"{customer}/{hostname}/{type}{datestr}.zst"
 
     print(f"loading object with key: {file_key} at bucket: {bucket}; body length: {len(entries)}")
+    payload_bytestr = '\n'.join(entries).encode('utf-8')
+    compressed_payload = compress_payload(payload=payload_bytestr)
 
     s3_object = s3.Object(bucket, file_key)
-    s3_object.put(Body='\n'.join(entries))
+    s3_object.put(Body=compressed_payload)
 
 def main(
         log_path: str
     ):
   assert Path(log_path).is_file(), ('"%s" is not a file or is missing' % log_path)
-  #print(f"this is the path we are using: {log_path}")
+
   file_id = unique_file_identifier(log_path)
 
   line_group = []
@@ -81,7 +87,6 @@ def main(
     sys.exit(0)
 
 def unique_file_identifier(filename):
-  # NOTE: `st_ino` is always 0 on windows, which won't work
   return Path(filename).stat().st_ino
 
 if __name__ == "__main__":

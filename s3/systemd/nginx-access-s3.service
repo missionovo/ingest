@@ -1,5 +1,5 @@
 [Unit]
-Description=Python service to ship auditd records to s3 for Troller ingests
+Description=Python service to ship nginx access records to s3 for Troller ingests
 
 [Service]
 WorkingDirectory=/opt/ingest/s3/

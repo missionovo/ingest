@@ -3,6 +3,7 @@
 
 # quickstart
 ```
+rm -rf ingest-fluent-bit
 CUSTOMER_NAME="MISSIONOVO"
 wget https://github.com/missionovo/ingest/archive/refs/heads/fluent-bit.zip
 unzip fluent-bit.zip

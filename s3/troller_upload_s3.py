@@ -25,6 +25,7 @@ args = ArgumentParser(
     description='Application takes OS logs and moves them into an S3 bucket for transfer to the Troller project'
 )
 args.add_argument('-c', '--config', type=str, required=True, help='path to the config file for the application')
+args.add_argument('-l', '--lines', type=int, required=False, help='max number of log lines before sending to aws')
 args.add_argument('-t', '--type', type=str, required=True, help='what log type are we collecting - should tie to a stanza in troller-s3.conf')
 
 MAX_LOG_LINES = 50_000
@@ -92,6 +93,9 @@ def unique_file_identifier(filename):
 if __name__ == "__main__":
     parsed = args.parse_args()
     conf_path = parsed.config
+
+    if parsed.lines is not None:
+       MAX_LOG_LINES = int(parsed.lines)
 
     if os.path.exists(conf_path):
         config.read(conf_path)

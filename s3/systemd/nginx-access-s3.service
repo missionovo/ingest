@@ -1,0 +1,10 @@
+[Unit]
+Description=Python service to ship auditd records to s3 for Troller ingests
+
+[Service]
+WorkingDirectory=/opt/ingest/s3/
+ExecStart=/opt/ingest/bin/python3 /opt/ingest/s3/troller_upload_s3.py -c /opt/ingest/s3/config/troller-s3.conf -t nginx-access -l 1000
+Restart=always
+
+[Install]
+WantedBy=default.target

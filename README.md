@@ -9,7 +9,7 @@ wget https://github.com/missionovo/ingest/archive/refs/heads/fluent-bit.zip
 unzip fluent-bit.zip
 rm -f fluent-bit.zip
 chmod +x ingest-fluent-bit/install.sh
-./ingest-fluent-bit/install.sh $CUSTOMER_NAME
+sudo ./ingest-fluent-bit/install.sh $CUSTOMER_NAME
 ```
 
 # customize

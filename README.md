@@ -3,13 +3,7 @@
 
 # quickstart
 ```
-rm -rf ingest-fluent-bit
-CUSTOMER_NAME="MISSIONOVO"
-wget https://github.com/missionovo/ingest/archive/refs/heads/fluent-bit.zip
-unzip fluent-bit.zip
-rm -f fluent-bit.zip
-chmod +x ingest-fluent-bit/install.sh
-sudo ./ingest-fluent-bit/install.sh $CUSTOMER_NAME
+curl https://raw.githubusercontent.com/missionovo/ingest/fluent-bit/install.sh | bash -s $CUSTOMER_NAME
 ```
 
 # customize

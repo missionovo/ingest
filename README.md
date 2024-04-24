@@ -3,7 +3,7 @@
 
 # quickstart
 ```
-curl https://raw.githubusercontent.com/missionovo/ingest/fluent-bit/install.sh | bash -s $CUSTOMER_NAME
+curl https://raw.githubusercontent.com/missionovo/ingest/fluent-bit/install.sh | sudo bash -s $CUSTOMER_NAME
 ```
 
 # customize
